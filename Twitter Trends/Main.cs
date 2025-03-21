@@ -16,6 +16,9 @@ namespace TweetSentimentAnalysis
         public string Text { get; set; }
         public double Latitude { get; set; }
         public double Longitude { get; set; }
+        // Можно добавить поле для даты, если нужно
+        // public DateTime? TweetDate { get; set; }
+
         // Рассчитанная тональность твита; null, если не удалось вычислить
         public double? Sentiment { get; set; }
     }
@@ -43,47 +46,125 @@ namespace TweetSentimentAnalysis
     {
         static void Main(string[] args)
         {
-            // Фаза 1: Анализ чувств в твитах
+            // Базовая директория (папка, где запущен .exe)
+            string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
 
-            // Задача 2: Загрузка и парсинг файла sentiments.csv
-            var sentimentDictionary = LoadSentiments("sentiments.csv");
-            Console.WriteLine("Словарь тональностей загружен.");
+            // Путь к папке "Data" в той же директории, что и приложение
+            string dataFolderPath = Path.Combine(baseDirectory, "Data");
 
-            // Фаза 2: Определение настроений по штатам
+            // Путь к файлам sentiments.csv и states.json
+            string sentimentsFilePath = Path.Combine(baseDirectory, "sentiments.csv");
+            string statesFilePath = Path.Combine(baseDirectory, "states.json");
 
-            // Задача 3: Загрузка и парсинг файла states.json
-            var states = LoadStates("states.json");
-            Console.WriteLine("Данные штатов загружены.");
+            // 1) Загружаем твиты из папки Data
+            var tweets = LoadAllTweets(dataFolderPath);
+            Console.WriteLine($"Загружено твитов: {tweets.Count}");
 
-            // Вычисляем центр для каждого штата
+            // 2) Загрузка словаря тональностей
+            var sentimentDictionary = LoadSentiments(sentimentsFilePath);
+            Console.WriteLine($"Словарь тональностей загружен. Количество слов: {sentimentDictionary.Count}");
+
+            // 3) Загрузка данных штатов
+            var states = LoadStates(statesFilePath);
+            Console.WriteLine($"Данные штатов загружены. Количество штатов: {states.Count}");
+
+            // 4) Вычисляем центр для каждого штата
             var stateCenters = CalculateStateCenters(states);
 
-            // Создадим список твитов для демонстрации
-            var tweets = new List<Tweet>
-            {
-                new Tweet { Text = "I love sunny days", Latitude = 34.0522, Longitude = -118.2437 },
-                new Tweet { Text = "It is a gloomy and sad day", Latitude = 40.7128, Longitude = -74.0060 },
-                new Tweet { Text = "Neutral feelings, nothing special", Latitude = 41.8781, Longitude = -87.6298 }
-            };
-
-            // Задача 1 и 2: Анализ тональности каждого твита
+            // 5) Анализ тональности каждого твита
             foreach (var tweet in tweets)
             {
                 tweet.Sentiment = AnalyzeSentiment(tweet.Text, sentimentDictionary);
-                Console.WriteLine($"Твит: \"{tweet.Text}\" | Тональность: {(tweet.Sentiment.HasValue ? tweet.Sentiment.Value.ToString("F2") : "нет данных")}");
             }
 
-            // Задача 4: Группировка твитов по ближайшим штатам
+            // 6) Группировка твитов по ближайшим штатам
             var tweetsByState = GroupTweetsByState(tweets, stateCenters);
 
-            // Задача 5: Вычисление средней тональности твитов по штатам
+            // 7) Вычисление средней тональности твитов по штатам
             var stateSentiments = CalculateStateSentiment(tweetsByState);
 
-            // Фаза 3: Визуализация данных на карте США
+            // 8) Условная визуализация (вывод) результатов
             RenderUSMap(stateSentiments);
 
             Console.WriteLine("Нажмите любую клавишу для выхода...");
             Console.ReadKey();
+        }
+
+        /// <summary>
+        /// Изменённый метод для вашего формата:
+        /// Считывает все твиты из всех .txt-файлов в указанной папке.
+        /// Формат строки (4 части, разделённые табуляцией):
+        ///   [lat, lon]    _    2014-02-16 03:11:33    Текст твита
+        /// </summary>
+        /// <param name="directoryPath">Путь к папке, где лежат файлы *.txt</param>
+        /// <returns>Список твитов</returns>
+        public static List<Tweet> LoadAllTweets(string directoryPath)
+        {
+            var allTweets = new List<Tweet>();
+
+            if (!Directory.Exists(directoryPath))
+            {
+                Console.WriteLine($"Папка {directoryPath} не найдена.");
+                return allTweets;
+            }
+
+            // Получаем все файлы с расширением .txt в папке
+            var txtFiles = Directory.GetFiles(directoryPath, "*.txt");
+
+            foreach (var filePath in txtFiles)
+            {
+                // Считываем все строки файла
+                var lines = File.ReadAllLines(filePath);
+
+                foreach (var line in lines)
+                {
+                    if (string.IsNullOrWhiteSpace(line))
+                        continue;
+
+                    // Разделяем строку по символу табуляции
+                    var parts = line.Split('\t');
+                    // Ожидаем не менее 4 частей: 
+                    //  [lat, lon]    _    2014-02-16 03:11:33    Text
+                    if (parts.Length < 4)
+                        continue;
+
+                    // Пример: parts[0] = "[38.29835689, -122.28522354]"
+                    var coordinatePart = parts[0].Trim();
+                    // Удаляем квадратные скобки
+                    coordinatePart = coordinatePart.Trim('[', ']');
+
+                    // Разделяем по запятой, чтобы получить lat и lon
+                    var coords = coordinatePart.Split(',');
+                    if (coords.Length < 2)
+                        continue;
+
+                    if (!double.TryParse(coords[0].Trim(), NumberStyles.Any, CultureInfo.InvariantCulture, out double lat))
+                        continue;
+                    if (!double.TryParse(coords[1].Trim(), NumberStyles.Any, CultureInfo.InvariantCulture, out double lon))
+                        continue;
+
+                    // Если нужна дата, можно парсить parts[2]
+                    // var datePart = parts[2].Trim();
+                    // DateTime? tweetDate = null;
+                    // if (DateTime.TryParse(datePart, out DateTime dt)) 
+                    // {
+                    //     tweetDate = dt;
+                    // }
+
+                    // Текст твита – всё, что в parts[3]
+                    var tweetText = parts[3].Trim();
+
+                    allTweets.Add(new Tweet
+                    {
+                        Text = tweetText,
+                        Latitude = lat,
+                        Longitude = lon
+                        // TweetDate = tweetDate
+                    });
+                }
+            }
+
+            return allTweets;
         }
 
         /// <summary>
@@ -96,7 +177,6 @@ namespace TweetSentimentAnalysis
         {
             var sentiments = new Dictionary<string, double>(StringComparer.OrdinalIgnoreCase);
 
-            // Если файла не существует, выводим сообщение и возвращаем пустой словарь
             if (!File.Exists(filePath))
             {
                 Console.WriteLine($"Файл {filePath} не найден.");
@@ -107,17 +187,15 @@ namespace TweetSentimentAnalysis
 
             foreach (var line in lines)
             {
-                // Пропускаем пустые строки
                 if (string.IsNullOrWhiteSpace(line))
                     continue;
 
-                // Разделяем строку по запятой
                 var parts = line.Split(',');
                 if (parts.Length != 2)
                     continue;
 
                 string word = parts[0].Trim();
-                if (double.TryParse(parts[1], NumberStyles.Any, CultureInfo.InvariantCulture, out double weight))
+                if (double.TryParse(parts[1].Trim(), NumberStyles.Any, CultureInfo.InvariantCulture, out double weight))
                 {
                     sentiments[word] = weight;
                 }
@@ -128,6 +206,7 @@ namespace TweetSentimentAnalysis
 
         /// <summary>
         /// Загрузка географических данных штатов из JSON-файла.
+        /// Формат файла должен соответствовать классу State.
         /// </summary>
         /// <param name="filePath">Путь к файлу states.json</param>
         /// <returns>Список объектов State</returns>
@@ -140,14 +219,13 @@ namespace TweetSentimentAnalysis
             }
 
             string jsonContent = File.ReadAllText(filePath);
-            var options = new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true
-            };
 
             try
             {
-                var states = JsonSerializer.Deserialize<List<State>>(jsonContent, options);
+                var states = JsonSerializer.Deserialize<List<State>>(jsonContent, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
                 return states ?? new List<State>();
             }
             catch (Exception ex)
@@ -161,7 +239,7 @@ namespace TweetSentimentAnalysis
         /// Вычисление центра каждого штата как среднего арифметического всех точек во всех полигонах.
         /// </summary>
         /// <param name="states">Список штатов</param>
-        /// <returns>Словарь, где ключ – код штата, значение – кортеж (средняя широта, средняя долгота)</returns>
+        /// <returns>Словарь, где ключ – код штата, значение – (средняя широта, средняя долгота)</returns>
         public static Dictionary<string, (double lat, double lon)> CalculateStateCenters(List<State> states)
         {
             var centers = new Dictionary<string, (double lat, double lon)>();
@@ -202,15 +280,14 @@ namespace TweetSentimentAnalysis
         /// <returns>Список слов (токенов)</returns>
         public static List<string> TokenizeTweet(string tweet)
         {
-            // Регулярное выражение \p{L}+ находит последовательности символов, являющихся буквами (включая символы из разных алфавитов)
             var matches = Regex.Matches(tweet, @"\p{L}+");
             return matches.Select(m => m.Value.ToLower()).ToList();
         }
 
         /// <summary>
         /// Анализирует тональность твита.
-        /// Находит все слова твита, ищет их в словаре тональностей и вычисляет среднее значение.
-        /// Если ни одно слово не найдено в словаре, возвращает null.
+        /// Находит все слова твита в словаре тональностей и вычисляет среднее значение.
+        /// Если ни одно слово не найдено, возвращает null.
         /// </summary>
         /// <param name="tweet">Текст твита</param>
         /// <param name="sentimentDictionary">Словарь тональностей</param>
@@ -237,8 +314,7 @@ namespace TweetSentimentAnalysis
         }
 
         /// <summary>
-        /// Находит ближайший штат к заданным координатам твита.
-        /// Используется евклидова дистанция между центром штата и координатами твита.
+        /// Находит ближайший штат к заданным координатам твита (евклидова дистанция до центра штата).
         /// </summary>
         /// <param name="tweetLat">Широта твита</param>
         /// <param name="tweetLon">Долгота твита</param>
@@ -254,6 +330,7 @@ namespace TweetSentimentAnalysis
                 double dLat = tweetLat - kvp.Value.lat;
                 double dLon = tweetLon - kvp.Value.lon;
                 double distanceSquared = dLat * dLat + dLon * dLon;
+
                 if (distanceSquared < minDistanceSquared)
                 {
                     minDistanceSquared = distanceSquared;
@@ -266,11 +343,11 @@ namespace TweetSentimentAnalysis
 
         /// <summary>
         /// Группирует твиты по ближайшим штатам.
-        /// Для каждого твита определяется ближайший штат, и он добавляется в словарь с ключом – код штата.
+        /// Для каждого твита определяется ближайший штат, и твит добавляется в словарь по коду штата.
         /// </summary>
         /// <param name="tweets">Список твитов</param>
         /// <param name="stateCenters">Словарь центров штатов</param>
-        /// <returns>Словарь, где ключ – код штата, значение – список твитов</returns>
+        /// <returns>Словарь: ключ – код штата, значение – список твитов</returns>
         public static Dictionary<string, List<Tweet>> GroupTweetsByState(List<Tweet> tweets, Dictionary<string, (double lat, double lon)> stateCenters)
         {
             var tweetsByState = new Dictionary<string, List<Tweet>>();
@@ -294,8 +371,8 @@ namespace TweetSentimentAnalysis
         /// Исключает твиты, для которых тональность не определена.
         /// Если для штата нет твитов с известной тональностью, результатом будет null.
         /// </summary>
-        /// <param name="tweetsByState">Словарь твитов, сгруппированных по штатам</param>
-        /// <returns>Словарь, где ключ – код штата, значение – средняя тональность (null, если данных нет)</returns>
+        /// <param name="tweetsByState">Словарь твитов по штатам</param>
+        /// <returns>Словарь: ключ – код штата, значение – средняя тональность (null, если данных нет)</returns>
         public static Dictionary<string, double?> CalculateStateSentiment(Dictionary<string, List<Tweet>> tweetsByState)
         {
             var stateSentiments = new Dictionary<string, double?>();
@@ -321,39 +398,39 @@ namespace TweetSentimentAnalysis
         }
 
         /// <summary>
-        /// Отображает карту США с цветовой индикацией тональности каждого штата.
-        /// Логика цветовой индикации:
-        /// - Если тональность не определена (null) – Серый.
-        /// - Если тональность > 0 – Жёлтый (положительная).
-        /// - Если тональность < 0 – Синий (отрицательная).
-        /// - Если тональность равна 0 – Белый (нейтральная).
-        /// В данном примере карта выводится в консоль.
+        /// Условная "визуализация": выводим в консоль средние тональности штатов и цвет, соответствующий тональности.
+        /// - null -> Серый
+        /// - > 0 -> Жёлтый
+        /// - < 0 -> Синий
+        /// - = 0 -> Белый
         /// </summary>
         /// <param name="stateSentiments">Словарь средней тональности по штатам</param>
         public static void RenderUSMap(Dictionary<string, double?> stateSentiments)
         {
-            Console.WriteLine("\nВизуализация карты США с тональностями штатов:");
+            Console.WriteLine("\nВизуализация карты США (условно):");
             foreach (var kvp in stateSentiments)
             {
                 string color;
-                if (!kvp.Value.HasValue)
+                double? sentiment = kvp.Value;
+
+                if (!sentiment.HasValue)
                 {
                     color = "Серый"; // Нет данных
                 }
-                else if (kvp.Value > 0)
+                else if (sentiment > 0)
                 {
                     color = "Жёлтый"; // Положительная тональность
                 }
-                else if (kvp.Value < 0)
+                else if (sentiment < 0)
                 {
                     color = "Синий"; // Отрицательная тональность
                 }
                 else
                 {
-                    color = "Белый"; // Нейтральная тональность
+                    color = "Белый"; // Нейтральная тональность (0)
                 }
 
-                Console.WriteLine($"Штат: {kvp.Key} | Средняя тональность: {(kvp.Value.HasValue ? kvp.Value.Value.ToString("F2") : "нет данных")} | Цвет: {color}");
+                Console.WriteLine($"Штат: {kvp.Key}, Средняя тональность: {(sentiment.HasValue ? sentiment.Value.ToString("F2") : "нет данных")}, Цвет: {color}");
             }
         }
     }
