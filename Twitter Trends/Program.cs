@@ -18,9 +18,9 @@ namespace Twitter_Trends
 
         static void Main(string[] args)
         {
-            tweetsPath = "D:\\twitter\\Tweets";
-            sentimentsPath = "D:\\twitter\\sentiments.csv";
-            statesPath = "D:\\twitter\\states.json";
+            tweetsPath = "D:\\TwitterTends\\Data\\Tweets";
+            sentimentsPath = "D:\\TwitterTends\\Data\\sentiments.csv";
+            statesPath = "D:\\TwitterTends\\Data\\states.json";
 
             List<Tweet> tweets = DataParser.LoadTweets(tweetsPath);
             Dictionary<string, double> sentiments = DataParser.LoadSentiments(sentimentsPath);

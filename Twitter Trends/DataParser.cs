@@ -110,31 +110,88 @@ namespace Twitter_Trends
 
         public static List<State> LoadStates(string statesPath)
         {
+            var states = new List<State>();
+
             if (!File.Exists(statesPath))
             {
                 Console.WriteLine($"Файл {statesPath} не найден.");
-                return new List<State>();
+                return states;
             }
 
-            string jsonContent = File.ReadAllText(statesPath);
+            string json = File.ReadAllText(statesPath);
 
-            try
+            var options = new JsonSerializerOptions
             {
-                var states = JsonSerializer.Deserialize<List<State>>(jsonContent, new JsonSerializerOptions
+                PropertyNameCaseInsensitive = true,
+                NumberHandling = System.Text.Json.Serialization.JsonNumberHandling.AllowReadingFromString
+            };
+
+            // Десериализация в словарь с JsonElement 
+            var statesData = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json, options);
+
+            var factory = new GeometryFactory();
+
+            foreach (var stateEntry in statesData)
+            {
+
+                var polygons = new List<Polygon>();
+
+                // Обработка массива полигонов для каждого штата
+                foreach (var polygonElement in stateEntry.Value.EnumerateArray())
                 {
-                    PropertyNameCaseInsensitive = true
-                });
+                    var rings = new List<LinearRing>();
 
-                Console.WriteLine(states.Count + " states\n");
+                    // Обработка каждого кольца в полигоне
+                    foreach (var ringElement in polygonElement.EnumerateArray())
+                    {
+                        var coordinates = new List<Coordinate>();
 
-                return states ?? new List<State>();
+                        // Обработка каждой точки в кольце
+                        foreach (var pointElement in ringElement.EnumerateArray())
+                        {
+                            if (pointElement.ValueKind == JsonValueKind.Array && pointElement.GetArrayLength() >= 2)
+                            {
+                                var x = pointElement[0].GetDouble();
+                                var y = pointElement[1].GetDouble();
+                                coordinates.Add(new Coordinate(x, y));
+                            }
+                        }
+
+                        // Создание кольца (минимум 4 точки, включая замыкающую)
+                        if (coordinates.Count >= 3)
+                        {
+                            // Замыкаем полигон, если не замкнут
+                            if (!coordinates[0].Equals2D(coordinates[^1]))
+                                coordinates.Add(new Coordinate(coordinates[0]));
+
+                            rings.Add(factory.CreateLinearRing(coordinates.ToArray()));
+                        }
+                    }
+
+                    // Создание полигона (первое кольцо - внешнее, остальные - отверстия)
+                    if (rings.Count > 0)
+                    {
+                        var shell = rings[0];
+                        var holes = rings.Skip(1).ToArray();
+                        polygons.Add(factory.CreatePolygon(shell, holes));
+                    }
+                }
+
+                // Создание мультиполигона для штата
+                if (polygons.Count > 0)
+                {
+                    states.Add(new State
+                    {
+                        PostalCode = stateEntry.Key,
+                        Shape = factory.CreateMultiPolygon(polygons.ToArray())
+                    });
+                }
             }
-            catch (Exception exception)
-            {
-                Console.WriteLine("Ошибка при разборе JSON: " + exception.Message);
 
-                return new List<State>();
-            }
+            Console.WriteLine(states.Count + " states\n");
+
+            return states;
         }
     }
 }
+

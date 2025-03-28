@@ -11,7 +11,7 @@ namespace Twitter_Trends
     public class State
     {
         public string PostalCode { get; set; }
-        //public List<List<Point>> Shape { get; set; }
+
         public MultiPolygon Shape { get; set; }
     }
 }
