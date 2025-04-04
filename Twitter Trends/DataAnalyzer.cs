@@ -9,33 +9,72 @@ using NetTopologySuite.Geometries;
 
 namespace Twitter_Trends
 {
-    public class DataAnalizer
+    public class DataAnalyzer
     {
         public static List<string> TokenizeTweet(string tweet)
         {
-            var matches = Regex.Matches(tweet, @"\p{L}+");
+            // Токенизация с учётом апострофов и дефисов
+            var matches = Regex.Matches(tweet, @"[\p{L}'-]+");
             return matches.Select(m => m.Value.ToLower()).ToList();
         }
 
         public static double? AnalyzeSentiment(string tweet, Dictionary<string, double> sentimentDictionary)
         {
-            var tokens = TokenizeTweet(tweet);
+            var words = TokenizeTweet(tweet);
+            if (words.Count == 0)
+                return null;
+
+            // Определяем максимальную длину фразы в словаре
+            int maxPhraseLength = GetMaxPhraseLength(sentimentDictionary);
+
             double sum = 0;
             int count = 0;
+            int i = 0;
 
-            foreach (var token in tokens)
+            while (i < words.Count)
             {
-                if (sentimentDictionary.TryGetValue(token, out double weight))
+                bool found = false;
+                int currentMaxLength = Math.Min(maxPhraseLength, words.Count - i);
+
+                // Проверяем фразы от самой длинной до самой короткой
+                for (int length = currentMaxLength; length >= 1; length--)
                 {
-                    sum += weight;
-                    count++;
+                    string phrase = string.Join(" ", words.Skip(i).Take(length));
+                    if (sentimentDictionary.TryGetValue(phrase, out double weight))
+                    {
+                        sum += weight;
+                        count++;
+                        i += length; // Перемещаемся на конец найденной фразы
+                        found = true;
+                        break;
+                    }
+                }
+
+                if (!found)
+                {
+                    // Если фраза не найдена, проверяем только текущее слово
+                    if (sentimentDictionary.TryGetValue(words[i], out double weight))
+                    {
+                        sum += weight;
+                        count++;
+                    }
+                    i++;
                 }
             }
 
-            if (count > 0)
-                return sum / count;
-            else
-                return null;
+            return count > 0 ? sum / count : (double?)null;
+        }
+
+        private static int GetMaxPhraseLength(Dictionary<string, double> sentimentDictionary)
+        {
+            int maxLength = 1;
+            foreach (var phrase in sentimentDictionary.Keys)
+            {
+                int length = phrase.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries).Length;
+                if (length > maxLength)
+                    maxLength = length;
+            }
+            return maxLength;
         }
 
         public static State FindNearestState(Tweet tweet, List<State> states)

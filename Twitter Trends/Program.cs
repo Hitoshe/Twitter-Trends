@@ -18,13 +18,19 @@ namespace Twitter_Trends
 
         static void Main(string[] args)
         {
-            tweetsPath = "D:\\TwitterTends\\Data\\Tweets";
-            sentimentsPath = "D:\\TwitterTends\\Data\\sentiments.csv";
-            statesPath = "D:\\TwitterTends\\Data\\states.json";
+            tweetsPath = "D:\\twitter\\Tweets";
+            sentimentsPath = "D:\\twitter\\sentiments.csv";
+            statesPath = "D:\\twitter\\states.json";
 
             List<Tweet> tweets = DataParser.LoadTweets(tweetsPath);
             Dictionary<string, double> sentiments = DataParser.LoadSentiments(sentimentsPath);
-            List<State> statess = DataParser.LoadStates(statesPath);
+            //List<State> statess = DataParser.LoadStates(statesPath);
+
+
+            string tweet = tweets[89].Text;
+            double? sentiment = DataAnalyzer.AnalyzeSentiment(tweet, sentiments);
+
+            Console.WriteLine(sentiment);
         }
     }
 }
