@@ -118,79 +118,135 @@ namespace Twitter_Trends
                 return states;
             }
 
-            string json = File.ReadAllText(statesPath);
+            var JSONContent = File.ReadAllText(statesPath);
+            var doc = JsonDocument.Parse(JSONContent);
+            var root = doc.RootElement;
 
-            var options = new JsonSerializerOptions
+            foreach (var stateProperty in root.EnumerateObject())
             {
-                PropertyNameCaseInsensitive = true,
-                NumberHandling = System.Text.Json.Serialization.JsonNumberHandling.AllowReadingFromString
-            };
+                string stateName = stateProperty.Name;
+                JsonElement state = stateProperty.Value;
 
-            // Десериализация в словарь с JsonElement 
-            var statesData = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json, options);
-
-            var factory = new GeometryFactory();
-
-            foreach (var stateEntry in statesData)
-            {
-
-                var polygons = new List<Polygon>();
-
-                // Обработка массива полигонов для каждого штата
-                foreach (var polygonElement in stateEntry.Value.EnumerateArray())
+                // Проверяем уровень вложенности
+                if (TryParseNestedLists(state, out List<List<List<List<double>>>> parsedData))
                 {
-                    var rings = new List<LinearRing>();
-
-                    // Обработка каждого кольца в полигоне
-                    foreach (var ringElement in polygonElement.EnumerateArray())
-                    {
-                        var coordinates = new List<Coordinate>();
-
-                        // Обработка каждой точки в кольце
-                        foreach (var pointElement in ringElement.EnumerateArray())
-                        {
-                            if (pointElement.ValueKind == JsonValueKind.Array && pointElement.GetArrayLength() >= 2)
-                            {
-                                var x = pointElement[0].GetDouble();
-                                var y = pointElement[1].GetDouble();
-                                coordinates.Add(new Coordinate(x, y));
-                            }
-                        }
-
-                        // Создание кольца (минимум 4 точки, включая замыкающую)
-                        if (coordinates.Count >= 3)
-                        {
-                            // Замыкаем полигон, если не замкнут
-                            if (!coordinates[0].Equals2D(coordinates[^1]))
-                                coordinates.Add(new Coordinate(coordinates[0]));
-
-                            rings.Add(factory.CreateLinearRing(coordinates.ToArray()));
-                        }
-                    }
-
-                    // Создание полигона (первое кольцо - внешнее, остальные - отверстия)
-                    if (rings.Count > 0)
-                    {
-                        var shell = rings[0];
-                        var holes = rings.Skip(1).ToArray();
-                        polygons.Add(factory.CreatePolygon(shell, holes));
-                    }
+                    states.Add(new State(stateName, ConvertToMultiPolygon(parsedData)));
                 }
-
-                // Создание мультиполигона для штата
-                if (polygons.Count > 0)
+                else
                 {
-                    states.Add(new State
-                    {
-                        PostalCode = stateEntry.Key,
-                        Shape = factory.CreateMultiPolygon(polygons.ToArray())
-                    });
+                    Console.WriteLine($"Ошибка в данных штата {stateName}: неверная структура");
                 }
             }
 
-            Console.WriteLine(states.Count + " states\n");
+            Console.WriteLine(states.Count + " states:\n");
 
             return states;
+        }
+
+        public static bool TryParseNestedLists(JsonElement element, out List<List<List<List<double>>>> result)
+        {
+            result = new List<List<List<List<double>>>>();
+            var UpperList = new List<List<List<double>>>();
+            var MiddleList = new List<List<double>>();
+            var LowerList = new List<double>();
+
+            // Если элемент не массив, возвращаем false
+            if (element.ValueKind != JsonValueKind.Array)
+                return false;
+
+            foreach (var level1 in element.EnumerateArray())
+            {
+                if (level1.ValueKind == JsonValueKind.Array)
+                {
+                    foreach (var level2 in level1.EnumerateArray())
+                    {
+                        if (level2.ValueKind == JsonValueKind.Array)
+                        {
+                            foreach (var level3 in level2.EnumerateArray())
+                            {
+                                if (level3.ValueKind == JsonValueKind.Array)
+                                {
+                                    foreach (var level4 in level3.EnumerateArray())
+                                    {
+                                        if (level4.ValueKind == JsonValueKind.Number)
+                                        {
+                                            LowerList.Add(level4.GetSingle());
+                                        }
+                                        else
+                                        {
+                                            return false;
+                                        }
+                                    }
+                                }
+                                else if (level3.ValueKind == JsonValueKind.Number)
+                                {
+                                    LowerList.Add(level3.GetSingle());
+                                }
+                                else
+                                {
+                                    return false;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                MiddleList.Add(LowerList);
+                UpperList.Add(MiddleList);
+                result.Add(UpperList);
+
+            }
+
+            return true;
+        }
+
+        public static MultiPolygon ConvertToMultiPolygon(List<List<List<List<double>>>> coordinates)
+        {
+            var polygons = new List<Polygon>();
+
+            // Проход по всем полигонам
+            foreach (var polygonCoords in coordinates)
+            {
+                var rings = new List<LinearRing>();
+
+                // Проход по всем кольцам полигона (внешнее + дырки)
+                foreach (var ringCoords in polygonCoords)
+                {
+                    var points = new List<Coordinate>();
+
+                    // Преобразование координат
+                    foreach (var point in ringCoords)
+                    {
+                        if (point.Count >= 2)
+                        {
+                            double x = point[0];
+                            double y = point[1];
+                            points.Add(new Coordinate(x, y));
+                        }
+                    }
+
+                    // Проверка замкнутости (первая = последняя точка)
+                    if (points.Count > 0 && !points[0].Equals(points[^1]))
+                    {
+                        points.Add(new Coordinate(points[0].X, points[0].Y));
+                    }
+
+                    if (points.Count >= 4) // Минимум 4 точки для кольца
+                    {
+                        rings.Add(new LinearRing(points.ToArray()));
+                    }
+                }
+
+                if (rings.Count > 0)
+                {
+                    // Первое кольцо - внешний контур, остальные - дырки
+                    var shell = rings[0];
+                    var holes = rings.Count > 1 ? rings.Skip(1).ToArray() : null;
+                    polygons.Add(new Polygon(shell, holes));
+                }
+            }
+
+            return new MultiPolygon(polygons.ToArray());
         }
     }
 }

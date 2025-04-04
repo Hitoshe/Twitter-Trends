@@ -77,11 +77,11 @@ namespace Twitter_Trends
             return maxLength;
         }
 
-        public static State FindNearestState(Tweet tweet, List<State> states)
+        public static State FindTweetState(Tweet tweet, List<State> states)
         {
             foreach (var state in states)
             {
-                if (state.Shape.Contains(tweet.Location))
+                if (state.Shape.Covers(tweet.Location))
                 {
                     return state;
                 }
@@ -96,7 +96,8 @@ namespace Twitter_Trends
 
             foreach (var tweet in tweets)
             {
-                State nearestState = FindNearestState(tweet, states);
+                State nearestState = FindTweetState(tweet, states);
+
                 if (nearestState != null)
                 {
                     if (!tweetsByState.ContainsKey(nearestState.PostalCode))

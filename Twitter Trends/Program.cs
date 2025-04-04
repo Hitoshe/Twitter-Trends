@@ -1,8 +1,14 @@
-﻿using System;
+﻿using NetTopologySuite.Geometries;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NetTopologySuite.Geometries;
+using NetTopologySuite.IO;
+using SFML.Graphics;
+using SFML.Window;
+using SFML.System;
 
 namespace Twitter_Trends
 {
@@ -24,13 +30,7 @@ namespace Twitter_Trends
 
             List<Tweet> tweets = DataParser.LoadTweets(tweetsPath);
             Dictionary<string, double> sentiments = DataParser.LoadSentiments(sentimentsPath);
-            //List<State> statess = DataParser.LoadStates(statesPath);
-
-
-            string tweet = tweets[89].Text;
-            double? sentiment = DataAnalyzer.AnalyzeSentiment(tweet, sentiments);
-
-            Console.WriteLine(sentiment);
+            List<State> statess = DataParser.LoadStates(statesPath);
         }
     }
 }
