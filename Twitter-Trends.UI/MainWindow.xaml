@@ -5,8 +5,54 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Twitter_Trends.UI"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
+        Title="Twitter Trends" Height="600" Width="1000"
+        Background="#1E1E2E">
 
+    <Window.Resources>
+        <!-- Стиль кнопки -->
+        <Style TargetType="Button">
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Background" Value="#3A3F4B"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Margin" Value="10"/>
+            <Setter Property="Padding" Value="10,5"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                CornerRadius="10"
+                                BorderBrush="#5A5A7A"
+                                BorderThickness="1">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="FontSize" Value="14"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="250"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- Левая панель с кнопками -->
+        <StackPanel Background="#2A2A3A" VerticalAlignment="Center" HorizontalAlignment="Center">
+            <Button Content="Загрузить твиты" Click="LoadTweets_Click"/>
+            <Button Content="Загрузить сентименты" Click="LoadSentiments_Click"/>
+            <Button Content="Загрузить штаты" Click="LoadStates_Click"/>
+        </StackPanel>
+
+        <!-- Правая панель с картой -->
+        <Border Grid.Column="1" Background="White" Margin="20" CornerRadius="10" BorderBrush="Gray" BorderThickness="1">
+            <!-- Здесь должна быть ваша карта -->
+            <Grid x:Name="MapControl">
+                <!-- Вставьте сюда ваш картографический контрол, например, MapControl -->
+            </Grid>
+        </Border>
     </Grid>
 </Window>
