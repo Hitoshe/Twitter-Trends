@@ -12,63 +12,50 @@ namespace Twitter_Trends
 {
     public class DataParser
     {
-        public static List<Tweet> LoadTweets(string tweetsPath)
+        public static List<Tweet> LoadTweets(string filePath)
         {
             var tweets = new List<Tweet>();
 
-            if (!Directory.Exists(tweetsPath))
+            var lines = File.ReadAllLines(filePath);
+
+            foreach (var line in lines)
             {
-                Console.WriteLine($"Папка {tweetsPath} не найдена.");
-                return tweets;
-            }
+                if (string.IsNullOrWhiteSpace(line))
+                    continue;
 
-            // Получаем все файлы с расширением .txt в папке
-            var txtFiles = Directory.GetFiles(tweetsPath, "*.txt");
+                // Разделяем строку по символу табуляции
+                var parts = line.Split('\t');
 
-            foreach (var filePath in txtFiles)
-            {
-                // Считываем все строки файла
-                var lines = File.ReadAllLines(filePath);
+                //  "Location"    "_"   "DateTime"   "Text"
+                if (parts.Length < 4)
+                    continue;
 
-                foreach (var line in lines)
+                // Очистка кооридинат от лишних символов
+                var coordinatePart = parts[0].Trim().Trim('[', ']');
+
+                // Разделяем по запятой, чтобы получить lat и lon
+                var coords = coordinatePart.Split(',');
+                if (coords.Length < 2)
+                    continue;
+
+                if (!double.TryParse(coords[0].Trim(), NumberStyles.Any, CultureInfo.InvariantCulture, out double latitude))
+                    continue;
+                if (!double.TryParse(coords[1].Trim(), NumberStyles.Any, CultureInfo.InvariantCulture, out double longitude))
+                    continue;
+
+
+                var datePart = parts[2].Trim();
+                DateTime.TryParse(datePart, out DateTime tweetDate);
+
+                // Текст твита – всё, что в parts[3]
+                var tweetText = parts[3].Trim();
+
+                tweets.Add(new Tweet
                 {
-                    if (string.IsNullOrWhiteSpace(line))
-                        continue;
-
-                    // Разделяем строку по символу табуляции
-                    var parts = line.Split('\t');
-
-                    //  "Location"    "_"   "DateTime"   "Text"
-                    if (parts.Length < 4)
-                        continue;
-
-                    // Очистка кооридинат от лишних символов
-                    var coordinatePart = parts[0].Trim().Trim('[', ']');
-
-                    // Разделяем по запятой, чтобы получить lat и lon
-                    var coords = coordinatePart.Split(',');
-                    if (coords.Length < 2)
-                        continue;
-
-                    if (!double.TryParse(coords[0].Trim(), NumberStyles.Any, CultureInfo.InvariantCulture, out double latitude))
-                        continue;
-                    if (!double.TryParse(coords[1].Trim(), NumberStyles.Any, CultureInfo.InvariantCulture, out double longitude))
-                        continue;
-
-
-                    var datePart = parts[2].Trim();
-                    DateTime.TryParse(datePart, out DateTime tweetDate);
-
-                    // Текст твита – всё, что в parts[3]
-                    var tweetText = parts[3].Trim();
-
-                    tweets.Add(new Tweet
-                    {
-                        Text = tweetText,
-                        Location = new Point(latitude, longitude),
-                        TweetDate = tweetDate
-                    });
-                }
+                    Text = tweetText,
+                    Location = new Point(latitude, longitude),
+                    TweetDate = tweetDate
+                });
             }
 
             Console.WriteLine(tweets.Count + " tweets\n");
