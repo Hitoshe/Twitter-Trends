@@ -25,21 +25,14 @@ namespace Twitter_Trends.UI
         public MainWindow()
         {
             InitializeComponent();
-            InitMap();
+           // InitMap();
         }
 
-        private void InitMap()
-        {
-            // Создание нового экземпляра карты
-            var map = new Mapsui.Map();
-
-            // Добавление слоев карты
-            map.Layers.Add(OpenStreetMap.CreateTileLayer());
-
-            // Присвоение карты элементу MapControl
-            MapControl.Children.Clear();  // Очистить все старые элементы
-            //MapControl.Children.Add(Map); // Добавить карту в MapControl
-        }
+        //private void InitMap()
+        //{
+        //    MapControl.Map = new Mapsui.Map();
+        //   // MapControl.Map.Layers.Add(OpenStreetMap.CreateTileLayer());
+        //}
 
         private void LoadTweets_Click(object sender, RoutedEventArgs e)
         {
@@ -68,7 +61,11 @@ namespace Twitter_Trends.UI
             {
                 states = DataParser.LoadStates(filePath);
                 MessageBox.Show($"Загружено штатов: {states.Count}");
-                // Например, здесь можно добавить отрисовку на карте
+
+                // Создаём карту с отрисованными штатами
+                var map = MapDrawer.CreateMapWithStates(states);
+                MapControl.Map = map; // Важно!
+                MapControl.ZoomToBox(new MPoint(-180, 30), new MPoint(-50, 50));
             }
         }
 

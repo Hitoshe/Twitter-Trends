@@ -6,6 +6,7 @@ using Mapsui.Styles;
 using Mapsui.Tiling;
 using Mapsui.Utilities;
 using NetTopologySuite.Geometries;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Twitter_Trends;
@@ -15,9 +16,6 @@ public class MapDrawer
     public static Map CreateMapWithStates(List<State> states)
     {
         var map = new Map();
-
-        // Добавим тайловый слой
-        map.Layers.Add(OpenStreetMap.CreateTileLayer());
 
         // Создаём фичи
         var features = new List<GeometryFeature>();
@@ -54,14 +52,25 @@ public class MapDrawer
         map.Layers.Add(stateLayer);
 
         // Центруем карту
+        // Вычисляем объединённый envelope всех геометрий
         var envelope = features
             .Where(f => f.Geometry != null)
             .Select(f => f.Geometry.EnvelopeInternal)
             .Aggregate((e1, e2) => e1.ExpandedBy(e2));
 
+        // Создаем прямоугольник (bbox) в тех координатах, в которых заданы геометрии
         var bbox = new MRect(envelope.MinX, envelope.MinY, envelope.MaxX, envelope.MaxY);
 
-        //map.Home = () => map.Navigator.NavigateTo(bbox, ScaleMethod.Fit);
+        // Вычисляем центр прямоугольника
+        double centerX = (bbox.Left + bbox.Right) / 2.0;
+        double centerY = (bbox.Bottom + bbox.Top) / 2.0;
+
+        // Вычисляем "разрешение": можно взять, например, максимальную длину стороны
+        double resolution = Math.Max(bbox.Width, bbox.Height);
+
+        // Устанавливаем домашнее положение карты
+        map.Home = n => n.ZoomTo(resolution);
+
 
         return map;
     }
