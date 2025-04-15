@@ -38,7 +38,7 @@ namespace Twitter_Trends.UI
 
             // Присвоение карты элементу MapControl
             MapControl.Children.Clear();  // Очистить все старые элементы
-           // MapControl.Children.Add(Map); // Добавить карту в MapControl
+            //MapControl.Children.Add(Map); // Добавить карту в MapControl
         }
 
         private void LoadTweets_Click(object sender, RoutedEventArgs e)

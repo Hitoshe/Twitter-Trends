@@ -42,9 +42,11 @@
 
         <!-- Левая панель с кнопками -->
         <StackPanel Background="#2A2A3A" VerticalAlignment="Center" HorizontalAlignment="Center">
+            <Image Source="Assets/flag.jpg" Stretch="Uniform" Height="204" Width="192" />
             <Button Content="Загрузить твиты" Click="LoadTweets_Click"/>
             <Button Content="Загрузить сентименты" Click="LoadSentiments_Click"/>
             <Button Content="Загрузить штаты" Click="LoadStates_Click"/>
+            <Image Source="Assets/logo.png" Stretch="Uniform" Height="204" Width="192" />
         </StackPanel>
 
         <!-- Правая панель с картой -->
