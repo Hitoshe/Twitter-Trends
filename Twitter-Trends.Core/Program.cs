@@ -26,7 +26,9 @@ namespace Twitter_Trends
 
             List<Tweet> tweets = DataParser.LoadTweets(tweetsPath);
             Dictionary<string, double> sentiments = DataParser.LoadSentiments(sentimentsPath);
-            List<State> statess = DataParser.LoadStates(statesPath);
+            List<State> states = DataParser.LoadStates(statesPath);
+
+
         }
     }
 }

@@ -129,7 +129,7 @@ namespace Twitter_Trends
                 JsonElement state = stateProperty.Value;
 
                 // Проверяем уровень вложенности
-                if (TryParseNestedLists(state, out List<List<List<List<double>>>> parsedData))
+                if (TryParseNestedLists(state, out List<List<List<double>>> parsedData))
                 {
                     states.Add(new State(stateName, ConvertToMultiPolygon(parsedData)));
                 }
@@ -144,16 +144,15 @@ namespace Twitter_Trends
             return states;
         }
 
-        public static bool TryParseNestedLists(JsonElement element, out List<List<List<List<double>>>> result)
+        private static bool TryParseNestedLists(JsonElement element, out List<List<List<double>>> result)
         {
-            result = new List<List<List<List<double>>>>();
-            var UpperList = new List<List<List<double>>>();
-            var MiddleList = new List<List<double>>();
-            var LowerList = new List<double>();
+            result = new List<List<List<double>>>();
+            var polygon = new List<List<double>>();
+            var coordinates = new List<double>();
 
-            // Если элемент не массив, возвращаем false
-            if (element.ValueKind != JsonValueKind.Array)
-                return false;
+            var isLevel4 = false;
+
+            if (element.ValueKind != JsonValueKind.Array) { return false; }
 
             foreach (var level1 in element.EnumerateArray())
             {
@@ -167,88 +166,82 @@ namespace Twitter_Trends
                             {
                                 if (level3.ValueKind == JsonValueKind.Array)
                                 {
+                                    isLevel4 = true;
+
                                     foreach (var level4 in level3.EnumerateArray())
                                     {
                                         if (level4.ValueKind == JsonValueKind.Number)
                                         {
-                                            LowerList.Add(level4.GetSingle());
+                                            coordinates.Add(level4.GetSingle());
                                         }
                                         else
                                         {
                                             return false;
                                         }
                                     }
+
+                                    polygon.Add(new List<double>(coordinates));
+                                    coordinates.Clear();
                                 }
                                 else if (level3.ValueKind == JsonValueKind.Number)
                                 {
-                                    LowerList.Add(level3.GetSingle());
+                                    coordinates.Add(level3.GetSingle());
                                 }
                                 else
                                 {
                                     return false;
                                 }
                             }
+
+                            if (!isLevel4)
+                            {
+                                polygon.Add(new List<double>(coordinates));
+                                coordinates.Clear();
+                            }
                         }
                     }
+
+                    result.Add(new List<List<double>>(polygon));
+                    polygon.Clear();
                 }
-
-                MiddleList.Add(LowerList);
-                UpperList.Add(MiddleList);
-                result.Add(UpperList);
-
             }
 
             return true;
         }
 
-        public static MultiPolygon ConvertToMultiPolygon(List<List<List<List<double>>>> coordinates)
+        public static MultiPolygon ConvertToMultiPolygon(List<List<List<double>>> coordinates)
         {
             var polygons = new List<Polygon>();
 
-            // Проход по всем полигонам
             foreach (var polygonCoords in coordinates)
             {
-                var rings = new List<LinearRing>();
+                var points = new List<Coordinate>();
 
-                // Проход по всем кольцам полигона (внешнее + дырки)
-                foreach (var ringCoords in polygonCoords)
+                foreach (var point in polygonCoords)
                 {
-                    var points = new List<Coordinate>();
-
-                    // Преобразование координат
-                    foreach (var point in ringCoords)
+                    if (point.Count >= 2)
                     {
-                        if (point.Count >= 2)
-                        {
-                            double x = point[0];
-                            double y = point[1];
-                            points.Add(new Coordinate(x, y));
-                        }
-                    }
-
-                    // Проверка замкнутости (первая = последняя точка)
-                    if (points.Count > 0 && !points[0].Equals(points[^1]))
-                    {
-                        points.Add(new Coordinate(points[0].X, points[0].Y));
-                    }
-
-                    if (points.Count >= 4) // Минимум 4 точки для кольца
-                    {
-                        rings.Add(new LinearRing(points.ToArray()));
+                        double x = point[0];
+                        double y = point[1];
+                        points.Add(new Coordinate(x, y));
                     }
                 }
 
-                if (rings.Count > 0)
+                // Замкнём кольцо, если не замкнуто
+                if (points.Count > 0 && !points[0].Equals2D(points[^1]))
                 {
-                    // Первое кольцо - внешний контур, остальные - дырки
-                    var shell = rings[0];
-                    var holes = rings.Count > 1 ? rings.Skip(1).ToArray() : null;
-                    polygons.Add(new Polygon(shell, holes));
+                    points.Add(new Coordinate(points[0].X, points[0].Y));
+                }
+
+                if (points.Count >= 4)
+                {
+                    var shell = new LinearRing(points.ToArray());
+                    polygons.Add(new Polygon(shell));
                 }
             }
 
             return new MultiPolygon(polygons.ToArray());
         }
+
     }
 }
-
