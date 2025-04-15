@@ -9,7 +9,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Microsoft.Win32;
-//using TwitterTrends.Core;
+//using Twitter-Trends.Core;
 using Mapsui;
 using Mapsui.Tiling;
 
@@ -19,7 +19,7 @@ namespace Twitter_Trends.UI
     {
         private DataParser parser = new DataParser();
         private List<Tweet> tweets;
-        private Dictionary<string, string> sentiments;
+        private Dictionary<string, double> sentiments;
         private List<State> states;
 
         public MainWindow()
@@ -46,17 +46,17 @@ namespace Twitter_Trends.UI
             var filePath = ShowFileDialog("Text files|*.txt");
             if (filePath != null)
             {
-                //tweets = parser.LoadTweets(filePath);
+                tweets = DataParser.LoadTweets(filePath);
                 MessageBox.Show($"Загружено твитов: {tweets.Count}");
             }
         }
-
+        
         private void LoadSentiments_Click(object sender, RoutedEventArgs e)
         {
-            var filePath = ShowFileDialog("Excel files|*.xlsx");
+            var filePath = ShowFileDialog("Excel files|*.csv");
             if (filePath != null)
             {
-               //sentiments = parser.LoadSentiments(filePath);
+                sentiments = DataParser.LoadSentiments(filePath);
                 MessageBox.Show($"Загружено сентиментов: {sentiments.Count}");
             }
         }
@@ -66,7 +66,7 @@ namespace Twitter_Trends.UI
             var filePath = ShowFileDialog("JSON files|*.json");
             if (filePath != null)
             {
-                //states = parser.LoadStates(filePath);
+                states = DataParser.LoadStates(filePath);
                 MessageBox.Show($"Загружено штатов: {states.Count}");
                 // Например, здесь можно добавить отрисовку на карте
             }

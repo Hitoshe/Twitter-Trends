@@ -3,17 +3,14 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Twitter-Trends.Core", "Twitter-Trends.Core\Twitter-Trends.Core.csproj", "{D1C27926-32D9-42B1-AE5A-0FC265D8C019}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Twitter-Trends-Core", "Twitter-Trends.Core\Twitter-Trends-Core.csproj", "{D1C27926-32D9-42B1-AE5A-0FC265D8C019}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Twitter-Trends.UI", "Twitter-Trends.UI\Twitter-Trends.UI.csproj", "{F215697E-F74D-432D-BD00-6DE76E43D745}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Twitter-Trends.UI", "Twitter-Trends.UI\Twitter-Trends.UI.csproj", "{F215697E-F74D-432D-BD00-6DE76E43D745}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{D1C27926-32D9-42B1-AE5A-0FC265D8C019}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -24,5 +21,11 @@ Global
 		{F215697E-F74D-432D-BD00-6DE76E43D745}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F215697E-F74D-432D-BD00-6DE76E43D745}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F215697E-F74D-432D-BD00-6DE76E43D745}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {12EE2724-5CBE-4368-A3A7-82B40A8B34CC}
 	EndGlobalSection
 EndGlobal

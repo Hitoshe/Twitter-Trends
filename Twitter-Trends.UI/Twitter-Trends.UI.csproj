@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <ProjectReference Include="..\Twitter-Trends.Core\Twitter-Trends.Core.csproj" />
+    <ProjectReference Include="..\Twitter-Trends.Core\Twitter-Trends-Core.csproj" />
   </ItemGroup>
 
   <PropertyGroup>
