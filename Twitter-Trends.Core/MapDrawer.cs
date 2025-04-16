@@ -19,11 +19,15 @@ public class MapDrawer
 {
     private static readonly List<(double Value, Color Color)> ColorStops = new List<(double, Color)>
     {
-        (-1.0, Color.Blue),
-        (-0.5, Color.Green),
-        (0.0, Color.Yellow),
-        (0.5, Color.Orange),
-        (1.0, Color.Red)
+        (-5, Color.Purple),
+        (-0.3, Color.Blue),
+        (-0.2, Color.Cyan),
+        (-0.1, Color.LightGreen),
+        (0.0, Color.Green),
+        (0.1, Color.Yellow),
+        (0.2, Color.Orange),
+        (0.3, Color.Red),
+        (5, Color.Pink)
     };
 
 
