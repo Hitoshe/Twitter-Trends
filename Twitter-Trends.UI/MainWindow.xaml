@@ -47,6 +47,7 @@
             <Button Content="Загрузить твиты" Click="LoadTweets_Click"/>
             <Button Content="Загрузить сентименты" Click="LoadSentiments_Click"/>
             <Button Content="Загрузить штаты" Click="LoadStates_Click"/>
+            <Button Content="Раскрасить карту" Click="PaintMap_Click"/>
             <Image Source="Assets/logo.png" Stretch="Uniform" Height="204" Width="192" />
         </StackPanel>
 

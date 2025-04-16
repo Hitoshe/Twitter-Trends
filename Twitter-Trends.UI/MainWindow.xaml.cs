@@ -46,7 +46,7 @@ namespace Twitter_Trends.UI
             }
         }
 
-        private async void PaintMap()
+        private async void PaintMap_Click(object sender, RoutedEventArgs e)
         {
             tweets = DataAnalyzer.AnalyzeTweetsSentiment(tweets, sentiments);
             await MapDrawer.ColorStatesBySentimentAsync(DataAnalyzer.CalculateStateSentiment(DataAnalyzer.GroupTweetsByState(tweets, states)), MapControl.Map);
