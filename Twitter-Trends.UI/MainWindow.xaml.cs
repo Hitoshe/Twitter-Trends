@@ -17,7 +17,6 @@ namespace Twitter_Trends.UI
 {
     public partial class MainWindow : Window
     {
-        private DataParser parser = new DataParser();
         private List<Tweet> tweets;
         private Dictionary<string, double> sentiments;
         private List<State> states;
@@ -44,7 +43,7 @@ namespace Twitter_Trends.UI
             }
         }
         
-        private void LoadSentiments_Click(object sender, RoutedEventArgs e)
+        private async void LoadSentiments_Click(object sender, RoutedEventArgs e)
         {
             var filePath = ShowFileDialog("Excel files|*.csv");
             if (filePath != null)
@@ -52,6 +51,11 @@ namespace Twitter_Trends.UI
                 sentiments = DataParser.LoadSentiments(filePath);
                 MessageBox.Show($"Загружено сентиментов: {sentiments.Count}");
             }
+
+            tweets = DataAnalyzer.AnalyzeTweetsSentiment(tweets, sentiments);
+            await MapDrawer.ColorStatesBySentimentAsync(DataAnalyzer.CalculateStateSentiment(DataAnalyzer.GroupTweetsByState(tweets, states)), MapControl.Map);
+
+            MapControl.RefreshGraphics(); // <-- Чтобы перерисовать карту
         }
 
         private void LoadStates_Click(object sender, RoutedEventArgs e)
@@ -63,7 +67,7 @@ namespace Twitter_Trends.UI
                 MessageBox.Show($"Загружено штатов: {states.Count}");
 
                 // Создаём карту с отрисованными штатами
-                var map = MapDrawer.CreateMapWithStates(states);
+                var map = MapDrawer.CreateMapWithStateLayers(states);
                 MapControl.Map = map; // Важно!
                 MapControl.ZoomToBox(new MPoint(-180, 30), new MPoint(-50, 50));
             }

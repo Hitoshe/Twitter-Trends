@@ -65,6 +65,17 @@ namespace Twitter_Trends
             return count > 0 ? sum / count : (double?)null;
         }
 
+        public static List<Tweet> AnalyzeTweetsSentiment(List<Tweet> tweets, Dictionary<string, double> sentimentDictionary)
+        {
+            foreach (var tweet in tweets)
+            {
+                tweet.Sentiment = AnalyzeSentiment(tweet.Text, sentimentDictionary);
+            }
+
+            return tweets;
+        }
+
+
         private static int GetMaxPhraseLength(Dictionary<string, double> sentimentDictionary)
         {
             int maxLength = 1;
@@ -79,15 +90,22 @@ namespace Twitter_Trends
 
         public static State FindTweetState(Tweet tweet, List<State> states)
         {
+            var tweetLocation = ReverseCoordinates(tweet.Location);
+
             foreach (var state in states)
             {
-                if (state.Shape.Covers(tweet.Location))
+                if (state.Shape.Contains(tweetLocation))
                 {
                     return state;
                 }
             }
 
             return null;
+        }
+
+        public static Point ReverseCoordinates(Point original)
+        {
+            return new Point(original.Y, original.X); // Меняем местами X и Y
         }
 
         public static Dictionary<string, List<Tweet>> GroupTweetsByState(List<Tweet> tweets, List<State> states)
