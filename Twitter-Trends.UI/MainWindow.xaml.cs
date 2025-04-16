@@ -12,6 +12,8 @@ using Microsoft.Win32;
 //using Twitter-Trends.Core;
 using Mapsui;
 using Mapsui.Tiling;
+using Mapsui.UI.Wpf;
+using Mapsui.UI;
 
 namespace Twitter_Trends.UI
 {
@@ -32,17 +34,17 @@ namespace Twitter_Trends.UI
             if (filePath != null)
             {
                 tweets = DataParser.LoadTweets(filePath);
-                MessageBox.Show($"Загружено твитов: {tweets.Count}");
+                TweetsCountText.Text = $"Твиты: {tweets.Count}";
             }
         }
-        
+
         private void LoadSentiments_Click(object sender, RoutedEventArgs e)
         {
             var filePath = ShowFileDialog("Excel files|*.csv");
             if (filePath != null)
             {
                 sentiments = DataParser.LoadSentiments(filePath);
-                MessageBox.Show($"Загружено сентиментов: {sentiments.Count}");
+                SentimentsCountText.Text = $"Сентименты: {sentiments.Count}";
             }
         }
 
@@ -60,7 +62,7 @@ namespace Twitter_Trends.UI
             if (filePath != null)
             {
                 states = DataParser.LoadStates(filePath);
-                MessageBox.Show($"Загружено штатов: {states.Count}");
+                StatesCountText.Text = $"Штатов: {states.Count}";
 
                 // Создаём карту с отрисованными штатами
                 var map = MapDrawer.CreateMapWithStateLayers(states);
@@ -73,6 +75,11 @@ namespace Twitter_Trends.UI
         {
             var dialog = new OpenFileDialog { Filter = filter };
             return dialog.ShowDialog() == true ? dialog.FileName : null;
+        }
+
+        private async void UnPaintMap_Click(object sender, RoutedEventArgs e)
+        {
+            //TODO: UNPAINT MAP CODE
         }
     }
 }
