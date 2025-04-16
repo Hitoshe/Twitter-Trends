@@ -24,14 +24,7 @@ namespace Twitter_Trends.UI
         public MainWindow()
         {
             InitializeComponent();
-           // InitMap();
         }
-
-        //private void InitMap()
-        //{
-        //    MapControl.Map = new Mapsui.Map();
-        //   // MapControl.Map.Layers.Add(OpenStreetMap.CreateTileLayer());
-        //}
 
         private void LoadTweets_Click(object sender, RoutedEventArgs e)
         {
@@ -43,7 +36,7 @@ namespace Twitter_Trends.UI
             }
         }
         
-        private async void LoadSentiments_Click(object sender, RoutedEventArgs e)
+        private void LoadSentiments_Click(object sender, RoutedEventArgs e)
         {
             var filePath = ShowFileDialog("Excel files|*.csv");
             if (filePath != null)
@@ -51,7 +44,10 @@ namespace Twitter_Trends.UI
                 sentiments = DataParser.LoadSentiments(filePath);
                 MessageBox.Show($"Загружено сентиментов: {sentiments.Count}");
             }
+        }
 
+        private async void PaintMap()
+        {
             tweets = DataAnalyzer.AnalyzeTweetsSentiment(tweets, sentiments);
             await MapDrawer.ColorStatesBySentimentAsync(DataAnalyzer.CalculateStateSentiment(DataAnalyzer.GroupTweetsByState(tweets, states)), MapControl.Map);
 
