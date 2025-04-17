@@ -50,8 +50,8 @@ public class MapDrawer
 
                     feature.Styles.Add(new VectorStyle
                     {
-                        Fill = new Brush(Color.FromArgb(100, 0, 120, 255)),
-                        Outline = new Pen(Color.Black, 1)
+                        Fill = new Brush(Color.Gray),
+                        Outline = new Pen(Color.Black, 0.5)
                     });
 
                     feature["PostalCode"] = state.PostalCode;
@@ -147,7 +147,7 @@ public class MapDrawer
                         feature.Styles.Add(new VectorStyle
                         {
                             Fill = new Brush(color),
-                            Outline = new Pen(Color.Black, 1)
+                            Outline = new Pen(Color.Black, 0.5)
                         });
                     }
                 }

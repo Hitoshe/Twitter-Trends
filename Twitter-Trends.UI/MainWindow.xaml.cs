@@ -26,6 +26,7 @@ namespace Twitter_Trends.UI
         public MainWindow()
         {
             InitializeComponent();
+            MapControl.Map.BackColor = Mapsui.Styles.Color.FromString("#2A2A3A");
         }
 
         private void LoadTweets_Click(object sender, RoutedEventArgs e)

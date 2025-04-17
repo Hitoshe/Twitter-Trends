@@ -43,13 +43,13 @@
 
         <!-- Левая панель с кнопками -->
         <StackPanel Background="#2A2A3A" VerticalAlignment="Center" HorizontalAlignment="Center">
-            <Image Source="Assets/flag.jpg" Stretch="Uniform" Height="218" Width="132" RenderTransformOrigin="0.481,0.514" />
+            <Image Source="Assets/flag.jpg" Stretch="Uniform" Height="125" Width="132" RenderTransformOrigin="0.481,0.514" />
             <Button Content="Загрузить твиты" Click="LoadTweets_Click" Height="30"/>
             <Button Content="Загрузить сентименты" Click="LoadSentiments_Click" Height="30"/>
             <Button Content="Загрузить штаты" Click="LoadStates_Click" Height="30"/>
             <Button Content="Раскрасить карту" Click="PaintMap_Click" Height="30"/>
             <Button Content="Очистить карту" Click="UnPaintMap_Click" Height="30"/>
-            <Image Source="Assets/logo.png" Stretch="Uniform" Height="204" Width="192" />
+            <Image Source="Assets/logo.png" Stretch="Uniform" Height="178" Width="192" />
         </StackPanel>
 
         <!-- Информационная панель -->
@@ -60,7 +60,7 @@
         </StackPanel>
 
         <!-- Правая панель с картой -->
-        <Border Grid.Column="1" Background="#3A3F4B" Margin="20,31,20,20" CornerRadius="10" BorderBrush="Gray" BorderThickness="1">
+        <Border Grid.Column="1" Background="#2A2A3A" Margin="20,31,20,20" CornerRadius="10">
             <mapsui:MapControl x:Name="MapControl" />
         </Border>
     </Grid>
