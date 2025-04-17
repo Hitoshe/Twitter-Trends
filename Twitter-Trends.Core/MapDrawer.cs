@@ -27,7 +27,7 @@ public class MapDrawer
         (0.1, Color.Yellow),
         (0.2, Color.Orange),
         (0.3, Color.Red),
-        (5, Color.Pink)
+        (5, Color.DarkRed)
     };
 
 
