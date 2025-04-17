@@ -88,7 +88,8 @@ namespace Twitter_Trends.UI
             TweetsCountText.Text = $"Твиты: {0}";
 
             var map = MapDrawer.CreateMapWithStateLayers(states);
-            MapControl.Map = map; 
+            MapControl.Map = map;
+            MapControl.Map.BackColor = Mapsui.Styles.Color.FromString("#2A2A3A");
             MapControl.ZoomToBox(new MPoint(-180, 30), new MPoint(-50, 50));
         }
     }
