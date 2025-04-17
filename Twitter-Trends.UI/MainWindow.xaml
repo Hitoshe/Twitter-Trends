@@ -86,9 +86,10 @@
 
             <!-- Подписи -->
             <StackPanel Margin="0,10,0,0" VerticalAlignment="Top">
-                <TextBlock Text="+5 (Хорошо)" Foreground="White" FontSize="12" HorizontalAlignment="Center"/>
-                <TextBlock Text="0 (Нейтрально)" Foreground="White" FontSize="12" HorizontalAlignment="Center" Margin="0,110,0,0"/>
-                <TextBlock Text="-5 (Плохо)" Foreground="White" FontSize="12" HorizontalAlignment="Center" Margin="0,100,0,0"/>
+
+                <!--   <TextBlock Text="+5 (Хорошо)" Foreground="White" FontSize="12" HorizontalAlignment="Center"/> 
+                  <TextBlock Text="0 (Нейтрально)" Foreground="White" FontSize="12" HorizontalAlignment="Center" Margin="0,110,0,0"/>
+                <TextBlock Text="-5 (Плохо)" Foreground="White" FontSize="12" HorizontalAlignment="Center" Margin="0,100,0,0"/> -->
             </StackPanel>
         </StackPanel>
     </Grid>
