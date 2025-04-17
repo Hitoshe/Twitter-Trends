@@ -68,6 +68,7 @@ namespace Twitter_Trends.UI
                 // Создаём карту с отрисованными штатами
                 var map = MapDrawer.CreateMapWithStateLayers(states);
                 MapControl.Map = map; // Важно!
+                MapControl.Map.BackColor = Mapsui.Styles.Color.FromString("#2A2A3A");
                 MapControl.ZoomToBox(new MPoint(-180, 30), new MPoint(-50, 50));
             }
         }

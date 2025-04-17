@@ -11,10 +11,12 @@ namespace Twitter_Trends
 {
     public class DataAnalyzer
     {
+        private static readonly Regex TokenRegex = new Regex(@"[\p{L}'-]+", RegexOptions.Compiled);
+
         public static List<string> TokenizeTweet(string tweet)
         {
             // Токенизация с учётом апострофов и дефисов
-            var matches = Regex.Matches(tweet, @"[\p{L}'-]+");
+            var matches = TokenRegex.Matches(tweet);
             return matches.Select(m => m.Value.ToLower()).ToList();
         }
 
@@ -67,10 +69,10 @@ namespace Twitter_Trends
 
         public static List<Tweet> AnalyzeTweetsSentiment(List<Tweet> tweets, Dictionary<string, double> sentimentDictionary)
         {
-            foreach (var tweet in tweets)
+            Parallel.ForEach(tweets, tweet =>
             {
                 tweet.Sentiment = AnalyzeSentiment(tweet.Text, sentimentDictionary);
-            }
+            });
 
             return tweets;
         }
@@ -110,20 +112,26 @@ namespace Twitter_Trends
 
         public static Dictionary<string, List<Tweet>> GroupTweetsByState(List<Tweet> tweets, List<State> states)
         {
+            var lockObj = new object();
             var tweetsByState = new Dictionary<string, List<Tweet>>();
 
-            foreach (var tweet in tweets)
+            tweets.AsParallel().ForAll(tweet =>
             {
-                State nearestState = FindTweetState(tweet, states);
+                var state = FindTweetState(tweet, states);
 
-                if (nearestState != null)
+                if (state != null)
                 {
-                    if (!tweetsByState.ContainsKey(nearestState.PostalCode))
-                        tweetsByState[nearestState.PostalCode] = new List<Tweet>();
+                    lock (lockObj)
+                    {
+                        if (!tweetsByState.ContainsKey(state.PostalCode))
+                        {
+                            tweetsByState[state.PostalCode] = new List<Tweet>();
+                        }
 
-                    tweetsByState[nearestState.PostalCode].Add(tweet);
+                        tweetsByState[state.PostalCode].Add(tweet);
+                    }
                 }
-            }
+            });
 
             return tweetsByState;
         }
