@@ -79,7 +79,15 @@ namespace Twitter_Trends.UI
 
         private async void UnPaintMap_Click(object sender, RoutedEventArgs e)
         {
-            //TODO: UNPAINT MAP CODE
+            tweets = null;
+            sentiments = null;
+            MapControl.RefreshGraphics();
+            SentimentsCountText.Text = $"Сентименты: {0}";
+            TweetsCountText.Text = $"Твиты: {0}";
+
+            var map = MapDrawer.CreateMapWithStateLayers(states);
+            MapControl.Map = map; 
+            MapControl.ZoomToBox(new MPoint(-180, 30), new MPoint(-50, 50));
         }
     }
 }
