@@ -50,10 +50,29 @@ namespace Twitter_Trends.UI
             if (tweets != null && sentiments != null && states != null)
             {
                 tweets = DataAnalyzer.AnalyzeTweetsSentiment(tweets, sentiments);
-                await MapDrawer.ColorStatesBySentimentAsync(DataAnalyzer.CalculateStateSentiment(DataAnalyzer.GroupTweetsByState(tweets, states)), MapControl.Map);
+                await MapDrawer.ColorStatesBySentimentAsync(
+                    DataAnalyzer.CalculateStateSentiment(DataAnalyzer.GroupTweetsByState(tweets, states)),
+                    MapControl.Map
+                );
                 await MapDrawer.AddTweetPointsToMap(tweets, MapControl.Map);
 
                 MapControl.RefreshGraphics(); // <-- Чтобы перерисовать карту
+            }
+            else
+            {
+                string missing = "";
+
+                if (tweets == null)
+                    missing += "- Твиты\n";
+                if (sentiments == null)
+                    missing += "- Сентименты\n";
+                if (states == null)
+                    missing += "- Штаты\n";
+
+                MessageBox.Show($"Перед раскраской карты необходимо загрузить:\n{missing}",
+                                "Недостаточно данных",
+                                MessageBoxButton.OK,
+                                MessageBoxImage.Warning);
             }
         }
 
