@@ -115,7 +115,6 @@ namespace Twitter_Trends
                 }
             }
 
-            // fallback (не должен вызываться)
             return Color.Gray;
         }
 
@@ -174,7 +173,6 @@ namespace Twitter_Trends
                     Fill = new Brush(GetColorForSentiment(tweet.Sentiment)),
                     Outline = new Pen(Color.Black, 0.5),
                     SymbolScale = 0.25f,
-
                 });
 
 

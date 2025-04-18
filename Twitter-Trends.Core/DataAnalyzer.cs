@@ -156,5 +156,15 @@ namespace Twitter_Trends
 
             return stateSentiments;
         }
+
+        public double? GetSentimentByState(string postalCode, Dictionary<string, double?> stateSentiments)
+        {
+            if (stateSentiments.TryGetValue(postalCode, out var sentiment))
+            {
+                return sentiment;
+            }
+
+            return null;
+        }
     }
 }

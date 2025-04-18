@@ -18,6 +18,7 @@ namespace Twitter_Trends.UI
         private List<Tweet> tweets;
         private Dictionary<string, double> sentiments;
         private List<State> states;
+        private Dictionary<string, double?> stateSentiments;
 
         public MainWindow()
         {
@@ -49,11 +50,15 @@ namespace Twitter_Trends.UI
         {
             if (tweets != null && sentiments != null && states != null)
             {
+                var existingLayer = MapControl.Map.Layers.FirstOrDefault(l => l.Name == "Tweets");
+                if (existingLayer != null)
+                {
+                    MapControl.Map.Layers.Remove(existingLayer);
+                }
+
                 tweets = DataAnalyzer.AnalyzeTweetsSentiment(tweets, sentiments);
-                await MapDrawer.ColorStatesBySentimentAsync(
-                    DataAnalyzer.CalculateStateSentiment(DataAnalyzer.GroupTweetsByState(tweets, states)),
-                    MapControl.Map
-                );
+                stateSentiments = DataAnalyzer.CalculateStateSentiment(DataAnalyzer.GroupTweetsByState(tweets, states));
+                await MapDrawer.ColorStatesBySentimentAsync(stateSentiments, MapControl.Map);
                 await MapDrawer.AddTweetPointsToMap(tweets, MapControl.Map);
 
                 MapControl.RefreshGraphics(); // <-- Чтобы перерисовать карту
