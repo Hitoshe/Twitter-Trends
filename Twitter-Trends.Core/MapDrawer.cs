@@ -15,17 +15,17 @@ namespace Twitter_Trends
     public class MapDrawer
     {
         private static readonly List<(double Value, Color Color)> ColorStops = new List<(double, Color)>
-    {
-        (-5, Color.Purple),
-        (-0.3, Color.Blue),
-        (-0.2, Color.Cyan),
-        (-0.1, Color.LightGreen),
-        (0.0, Color.Green),
-        (0.1, Color.Yellow),
-        (0.2, Color.Orange),
-        (0.3, Color.Red),
-        (5, Color.DarkRed)
-    };
+        {
+            (-5, Color.Purple),
+            (-0.3, Color.Blue),
+            (-0.2, Color.Cyan),
+            (-0.1, Color.LightGreen),
+            (0.0, Color.Green),
+            (0.1, Color.Yellow),
+            (0.2, Color.Orange),
+            (0.3, Color.Red),
+            (5, Color.DarkRed)
+        };
 
 
         public static Map CreateMapWithStateLayers(List<State> states)
@@ -172,7 +172,7 @@ namespace Twitter_Trends
                     SymbolType = SymbolType.Ellipse,
                     Fill = new Brush(GetColorForSentiment(tweet.Sentiment)),
                     Outline = new Pen(Color.Black, 0.5),
-                    SymbolScale = 0.25f,
+                    SymbolScale = 0.15f,
                 });
 
 

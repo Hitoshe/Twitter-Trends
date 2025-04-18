@@ -10,6 +10,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Microsoft.Win32;
 using Mapsui;
+using System.Reflection;
 
 namespace Twitter_Trends.UI
 {
@@ -107,16 +108,27 @@ namespace Twitter_Trends.UI
 
         private async void UnPaintMap_Click(object sender, RoutedEventArgs e)
         {
-            tweets = null;
-            sentiments = null;
-            MapControl.RefreshGraphics();
-            SentimentsCountText.Text = $"Сентименты: {0}";
-            TweetsCountText.Text = $"Твиты: {0}";
+            if (states != null)
+            {
+                tweets = null;
+                sentiments = null;
+                MapControl.RefreshGraphics();
+                SentimentsCountText.Text = $"Сентименты: {0}";
+                TweetsCountText.Text = $"Твиты: {0}";
+                FileNameTextBlock.Text = $"Загружен файл: None";
 
-            var map = MapDrawer.CreateMapWithStateLayers(states);
-            MapControl.Map = map;
-            MapControl.Map.BackColor = Mapsui.Styles.Color.FromString("#2A2A3A");
-            MapControl.ZoomToBox(new MPoint(-180, 30), new MPoint(-50, 50));
+                var map = MapDrawer.CreateMapWithStateLayers(states);
+                MapControl.Map = map;
+                MapControl.Map.BackColor = Mapsui.Styles.Color.FromString("#2A2A3A");
+                MapControl.ZoomToBox(new MPoint(-180, 30), new MPoint(-50, 50));
+            }
+            else
+            {
+                MessageBox.Show($"Карта не загружена",
+                               "Недостаточно данных",
+                               MessageBoxButton.OK,
+                               MessageBoxImage.Warning);
+            }
         }
     }
 }

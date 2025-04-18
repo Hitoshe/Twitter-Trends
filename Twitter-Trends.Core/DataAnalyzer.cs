@@ -93,7 +93,7 @@ namespace Twitter_Trends
 
             foreach (var state in states)
             {
-                if (state.Shape.Contains(tweetLocation))
+                if (state.Shape.Covers(tweetLocation))
                 {
                     return state;
                 }

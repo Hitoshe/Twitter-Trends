@@ -58,8 +58,6 @@ namespace Twitter_Trends
                 });
             }
 
-            Console.WriteLine(tweets.Count + " tweets\n");
-
             return tweets;
         }
 
@@ -69,7 +67,6 @@ namespace Twitter_Trends
 
             if (!File.Exists(sentimentsPath))
             {
-                Console.WriteLine($"Файл {sentimentsPath} не найден.");
                 return sentiments;
             }
 
@@ -91,8 +88,6 @@ namespace Twitter_Trends
                 }
             }
 
-            Console.WriteLine(sentiments.Count + " sentiments\n");
-
             return sentiments;
         }
 
@@ -102,7 +97,6 @@ namespace Twitter_Trends
 
             if (!File.Exists(statesPath))
             {
-                Console.WriteLine($"Файл {statesPath} не найден.");
                 return states;
             }
 
@@ -120,13 +114,7 @@ namespace Twitter_Trends
                 {
                     states.Add(new State(stateName, ConvertToMultiPolygon(parsedData)));
                 }
-                else
-                {
-                    Console.WriteLine($"Ошибка в данных штата {stateName}: неверная структура");
-                }
             }
-
-            Console.WriteLine(states.Count + " states:\n");
 
             return states;
         }
