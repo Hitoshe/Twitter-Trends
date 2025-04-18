@@ -33,6 +33,8 @@ namespace Twitter_Trends.UI
             {
                 tweets = DataParser.LoadTweets(filePath);
                 TweetsCountText.Text = $"Твиты: {tweets.Count}";
+
+                FileNameTextBlock.Text = $"Загружен файл: {System.IO.Path.GetFileName(filePath)}";
             }
         }
 

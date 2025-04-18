@@ -59,6 +59,7 @@
             <TextBlock x:Name="StatesCountText" Foreground="White" FontSize="14" Margin="10,0"/>
             <TextBlock x:Name="SentimentsCountText" Foreground="White" FontSize="14" Margin="10,0"/>
             <TextBlock x:Name="TweetsCountText" Foreground="White" FontSize="14" Margin="10,0"/>
+            <TextBlock x:Name="FileNameTextBlock" Foreground="White" FontSize="14" Margin="10,0"/>
         </StackPanel>
 
         <!-- Центр: карта -->
