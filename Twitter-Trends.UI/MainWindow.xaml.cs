@@ -47,11 +47,14 @@ namespace Twitter_Trends.UI
 
         private async void PaintMap_Click(object sender, RoutedEventArgs e)
         {
-            tweets = DataAnalyzer.AnalyzeTweetsSentiment(tweets, sentiments);
-            await MapDrawer.ColorStatesBySentimentAsync(DataAnalyzer.CalculateStateSentiment(DataAnalyzer.GroupTweetsByState(tweets, states)), MapControl.Map);
-            await MapDrawer.AddTweetPointsToMap(tweets, MapControl.Map);
+            if (tweets != null && sentiments != null && states != null)
+            {
+                tweets = DataAnalyzer.AnalyzeTweetsSentiment(tweets, sentiments);
+                await MapDrawer.ColorStatesBySentimentAsync(DataAnalyzer.CalculateStateSentiment(DataAnalyzer.GroupTweetsByState(tweets, states)), MapControl.Map);
+                await MapDrawer.AddTweetPointsToMap(tweets, MapControl.Map);
 
-            MapControl.RefreshGraphics(); // <-- Чтобы перерисовать карту
+                MapControl.RefreshGraphics(); // <-- Чтобы перерисовать карту
+            }
         }
 
         private void LoadStates_Click(object sender, RoutedEventArgs e)
