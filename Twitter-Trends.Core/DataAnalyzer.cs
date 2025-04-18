@@ -5,6 +5,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using NetTopologySuite.Geometries;
+using SkiaSharp;
 
 
 namespace Twitter_Trends
@@ -15,7 +16,6 @@ namespace Twitter_Trends
 
         public static List<string> TokenizeTweet(string tweet)
         {
-            // Токенизация с учётом апострофов и дефисов
             var matches = TokenRegex.Matches(tweet);
             return matches.Select(m => m.Value.ToLower()).ToList();
         }
@@ -26,7 +26,6 @@ namespace Twitter_Trends
             if (words.Count == 0)
                 return null;
 
-            // Определяем максимальную длину фразы в словаре
             int maxPhraseLength = GetMaxPhraseLength(sentimentDictionary);
 
             double sum = 0;
@@ -38,7 +37,6 @@ namespace Twitter_Trends
                 bool found = false;
                 int currentMaxLength = Math.Min(maxPhraseLength, words.Count - i);
 
-                // Проверяем фразы от самой длинной до самой короткой
                 for (int length = currentMaxLength; length >= 1; length--)
                 {
                     string phrase = string.Join(" ", words.Skip(i).Take(length));
@@ -46,7 +44,7 @@ namespace Twitter_Trends
                     {
                         sum += weight;
                         count++;
-                        i += length; // Перемещаемся на конец найденной фразы
+                        i += length;
                         found = true;
                         break;
                     }
@@ -54,7 +52,6 @@ namespace Twitter_Trends
 
                 if (!found)
                 {
-                    // Если фраза не найдена, проверяем только текущее слово
                     if (sentimentDictionary.TryGetValue(words[i], out double weight))
                     {
                         sum += weight;
@@ -64,7 +61,7 @@ namespace Twitter_Trends
                 }
             }
 
-            return count > 0 ? sum / count : (double?)null;
+            return count > 0 ? sum / count : 0;
         }
 
         public static List<Tweet> AnalyzeTweetsSentiment(List<Tweet> tweets, Dictionary<string, double> sentimentDictionary)
@@ -107,7 +104,7 @@ namespace Twitter_Trends
 
         public static Point ReverseCoordinates(Point original)
         {
-            return new Point(original.Y, original.X); // Меняем местами X и Y
+            return new Point(original.Y, original.X);
         }
 
         public static Dictionary<string, List<Tweet>> GroupTweetsByState(List<Tweet> tweets, List<State> states)

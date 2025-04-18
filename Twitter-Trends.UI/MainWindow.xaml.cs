@@ -9,11 +9,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Microsoft.Win32;
-//using Twitter-Trends.Core;
 using Mapsui;
-using Mapsui.Tiling;
-using Mapsui.UI.Wpf;
-using Mapsui.UI;
 
 namespace Twitter_Trends.UI
 {
@@ -53,6 +49,7 @@ namespace Twitter_Trends.UI
         {
             tweets = DataAnalyzer.AnalyzeTweetsSentiment(tweets, sentiments);
             await MapDrawer.ColorStatesBySentimentAsync(DataAnalyzer.CalculateStateSentiment(DataAnalyzer.GroupTweetsByState(tweets, states)), MapControl.Map);
+            await MapDrawer.AddTweetPointsToMap(tweets, MapControl.Map);
 
             MapControl.RefreshGraphics(); // <-- Чтобы перерисовать карту
         }
